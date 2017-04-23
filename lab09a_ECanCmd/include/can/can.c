@@ -215,7 +215,6 @@ void ECAN_clearMDH(ECAN_Handle handle){
 
 /* enable all Mailboxes  */
 void ECAN_enableAllMailbox(ECAN_Handle handle){
-
 	handle->ECanaRegs->CANME.all = 0xFFFFFFFF;
 }
 

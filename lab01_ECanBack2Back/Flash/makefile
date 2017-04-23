@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/c2000_6.2.9
+CG_TOOL_ROOT := D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.9
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -152,7 +152,7 @@ all: lab01_ECanBack2Back.out
 lab01_ECanBack2Back.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: C2000 Linker'
-	"C:/ti/ccsv6/tools/compiler/c2000_6.2.9/bin/cl2000" -v28 -ml -mt -O2 -g --define=FAST_ROM_V1p6 --define=eCAN=1 --define=FLASH --diag_warning=225 --display_error_number -z -m"lab01_ECanBack2Back.map" --stack_size=0x3B0 --warn_sections -i"C:/ti/ccsv6/tools/compiler/c2000_6.2.9/lib" -i"C:/ti/ccsv6/tools/compiler/c2000_6.2.9/include" --reread_libs --priority --disable_auto_rts --diag_suppress=16002 --xml_link_info="lab01_ECanBack2Back_linkInfo.xml" --rom_model -o "lab01_ECanBack2Back.out" $(ORDERED_OBJS)
+	"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.9/bin/cl2000" -v28 -ml -mt -O2 -g --define=FAST_ROM_V1p6 --define=eCAN=1 --define=FLASH --diag_warning=225 --display_error_number -z -m"lab01_ECanBack2Back.map" --stack_size=0x3B0 --warn_sections -i"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.9/lib" -i"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.9/include" --reread_libs --priority --disable_auto_rts --diag_suppress=16002 --xml_link_info="lab01_ECanBack2Back_linkInfo.xml" --rom_model -o "lab01_ECanBack2Back.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
