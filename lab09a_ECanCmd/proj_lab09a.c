@@ -106,18 +106,23 @@ CTRL_Obj ctrl;				//v1p7 format
 #endif
 
 uint16_t gLEDcnt = 0;
-uint16_t gTXtemp = 0;
 
-uint32_t timer0_count=0;
+#ifdef ECAN_API
+uint_least32_t  ErrorCount = 0;
+uint_least32_t  PassCount = 0;
+uint_least32_t  MessageReceivedCount = 0;
+
+uint16_t gTXtemp = 0;
 
 int ECANIDS = 6;
 uint32_t ECAN_rxBuf[8] = {0,0,0,0,0,0,0,0};
 ECAN_Mailbox gECAN_Mailbox;
 
-//FIFO(32) gECAN_rxFIFO;
+FIFO_ID_Obj gECAN_rxFIFO_ID;
+FIFO_ID_Obj gECAN_txFIFO_ID;
+#endif
 
-FIFO_Obj gECAN_rxFIFO;
-
+uint32_t timer0_count=0;
 
 volatile MOTOR_Vars_t gMotorVars = MOTOR_Vars_INIT;
 
@@ -156,27 +161,6 @@ _iq gTorque_Flux_Iq_pu_to_Nm_sf;
 
 // **************************************************************************
 // the functions
-#ifdef ecan_test
-uint_least32_t  ErrorCount = 0;
-uint_least32_t  PassCount = 0;
-uint_least32_t  MessageReceivedCount = 0;
-
-uint_least32_t  TestMbox1 = 0;
-uint_least32_t  TestMbox2 = 0;
-uint_least32_t  TestMbox3 = 0;
-
-uint_least16_t  j;
-
-// Prototype statements for functions found within this file.
-void mailbox_check(int_least32_t T1, int_least32_t T2, int_least32_t T3);
-void mailbox_read(ECAN_Handle handle, int_least16_t MBXnbr);
-#endif
-
-#ifdef ECAN_API
-uint_least32_t  ErrorCount = 0;
-uint_least32_t  PassCount = 0;
-uint_least32_t  MessageReceivedCount = 0;
-#endif
 
 void main(void)
 {
@@ -185,8 +169,6 @@ void main(void)
 #ifdef FAST_ROM_V1p6
   uint_least8_t ctrlNumber = 0;
 #endif
-
-  FIFO_FLUSH(gECAN_rxFIFO);
 
   // Only used if running from FLASH
   // Note that the variable FLASH is defined by the project
@@ -342,105 +324,67 @@ void main(void)
   gTorque_Ls_Id_Iq_pu_to_Nm_sf = USER_computeTorque_Ls_Id_Iq_pu_to_Nm_sf();
   gTorque_Flux_Iq_pu_to_Nm_sf = USER_computeTorque_Flux_Iq_pu_to_Nm_sf();
 
-#ifdef ecan_test
-  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  //                                                    MailBoxID                                                                   Mask
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox0,  0x1555AAA0, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox1,  0x1555AAA1, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox2,  0x1555AAA2, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox3,  0x1555AAA3, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox4,  0x1555AAA4, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox5,  0x1555AAA5, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox6,  0x1555AAA6, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox7,  0x1555AAA7, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox8,  0x1555AAA8, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox9,  0x1555AAA9, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox10, 0x1555AAAA, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox11, 0x1555AAAB, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox12, 0x1555AAAC, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox13, 0x1555AAAD, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox14, 0x1555AAAE, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox15, 0x1555AAAF, Enable_Mbox, Tx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox16, 0x1555AAA0, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox17, 0x1555AAA1, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox18, 0x1555AAA2, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox19, 0x1555AAA3, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox20, 0x1555AAA4, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox21, 0x1555AAA5, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox22, 0x1555AAA6, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox23, 0x1555AAA7, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox24, 0x1555AAA8, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox25, 0x1555AAA9, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox26, 0x1555AAAA, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox27, 0x1555AAAB, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox28, 0x1555AAAC, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox29, 0x1555AAAD, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox30, 0x1555AAAE, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox31, 0x1555AAAF, Enable_Mbox, Rx_Dir, Extended_ID, DLC_8, LAMI_0, Mask_not_used, 0x00000000);
-//                                                       MDL         MDH
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox0,  0x9555AAA0, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox1,  0x9555AAA1, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox2,  0x9555AAA2, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox3,  0x9555AAA3, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox4,  0x9555AAA4, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox5,  0x9555AAA5, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox6,  0x9555AAA6, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox7,  0x9555AAA7, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox8,  0x9555AAA8, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox9,  0x9555AAA9, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox10, 0x9555AAAA, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox11, 0x9555AAAB, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox12, 0x9555AAAC, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox13, 0x9555AAAD, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox14, 0x9555AAAE, 0x89ABCDEF);
-  ECAN_putDataMailbox(halHandle->ecanaHandle, MailBox15, 0x9555AAAF, 0x89ABCDEF);
-
-  //ECAN_setSelfTest(halHandle->ecanaHandle);
-  //ECAN_resetSelfTest(halHandle->ecanaHandle);
-  //ECAN_SelfTest(halHandle->ecanaHandle, Normal_mode);
-  ECAN_SelfTest(halHandle->ecanaHandle, Self_test_mode);
-  //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-#endif
-
+//  ECAN_configAuto_Answer(halHandle->ecanaHandle, MailBox0, 8,Standard_ID, DLC_8, 0x5A5A5A5A, 0x5A5A5A5A);
 //                                               	    MailBoxID                                                              Mask
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox0,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox1,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox2,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox3,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox4,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox5,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox6,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox7,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox8,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox9,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox10, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox11, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox12, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox13, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox14, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox15, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0x0000FF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox0,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox1,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox2,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox3,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox4,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox5,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox6,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox7,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox8,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox9,  ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox10, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox11, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox12, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox13, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox14, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox15, ECANIDS, Enable_Mbox, Tx_Dir, Standard_ID, DLC_8, Overwrite_on, LAMI_0, Mask_is_used, 0xFF80);
 
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox16, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox17, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox18, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox19, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox20, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox21, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox22, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox23, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox24, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox25, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox26, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox27, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox28, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox29, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox30, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
-  ECAN_configMailbox(halHandle->ecanaHandle, MailBox31, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0x0000FF80);
+  ECAN_setTx_Priority(halHandle->ecanaHandle, MailBox15, Tx_leve31);
+
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox16, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox17, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox18, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox19, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox20, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox21, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox22, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox23, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox24, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox25, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox26, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox27, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox28, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox29, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox30, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);
+  ECAN_configMailbox(halHandle->ecanaHandle, MailBox31, ECANIDS, Enable_Mbox, Rx_Dir, Standard_ID, DLC_8, Overwrite_off, LAMI_0, Mask_is_used, 0xFF80);  // 1F80
   //                                    TX_max    TX_min    RX_max     RX_min
-  ECAN_initMailboxObj(&gECAN_Mailbox, MailBox15, MailBox0, MailBox31, MailBox16);
+  ECAN_initMailboxUse(&gECAN_Mailbox, MailBox15, MailBox0, MailBox31, MailBox16);
 
-  ECAN_SelfTest(halHandle->ecanaHandle, Self_test_mode);
+//  ECAN_setTx_Priority(halHandle->ecanaHandle, MailBox0, Tx_leve31);
+//  ECAN_SelfTest(halHandle->ecanaHandle, Self_test_mode);
+  ECAN_SelfTest(halHandle->ecanaHandle, Normal_mode);
+
+    FIFO_FLUSH(gECAN_rxFIFO_ID);
+    FIFO_FLUSH(gECAN_txFIFO_ID);
+
+//  ECAN_putDataMailbox_ID(halHandle->ecanaHandle, MailBox15, 0x106, DLC_8, 0x5A5A5A5A, 0x5A5A5A5A);
+//  ECAN_transmitMsg(halHandle->ecanaHandle, MailBox15);
+//  ECAN_putDataMailbox_ID(halHandle->ecanaHandle, MailBox14, 0x606, DLC_2, 0xA5A5A5A5, 0xA5A5A5A5);
+//  ECAN_putDataMailbox_ID(halHandle->ecanaHandle, MailBox13, 0x706, DLC_3, 0xA5A5A5A5, 0xA5A5A5A5);
+//  ECAN_transmit_N(halHandle->ecanaHandle, (uint32_t)((1<<MailBox13) | (1<<MailBox14)));
+//  ECAN_sendMsg_ID(halHandle->ecanaHandle, MailBox12, 0x206, DLC_4, 0xA5A5A5A5, 0xA5A5A5A5);
+
+   int i = 0;
+   for(i = 0; i < 16; i++) {
+	   FIFO_PUSH_ID(&gECAN_txFIFO_ID, 0x006 + (0x100*i), DLC_0 + i, 0x01020304, 0x05060708);
+	   //MessageReceivedCount++;
+   }
+
+   while(!(ECAN_sendMsg_FIFO_ID_One(halHandle->ecanaHandle, &gECAN_Mailbox, &gECAN_txFIFO_ID))) MessageReceivedCount++;
 
   for(;;)
   {
@@ -456,45 +400,36 @@ void main(void)
     while(gMotorVars.Flag_enableSys)
       {
 
-#ifdef ecan_test
-	 ECAN_REGS_t *regs = (halHandle->ecanaHandle->ECanaRegs);
-	 regs->CANTRS.all = 0x0000FFFF; // Set TRS for all transmit mailboxes
-	 while(regs->CANTA.all != 0x0000FFFF ) {}  // Wait for all TAn bits to be set..
-	 regs->CANTA.all = 0x0000FFFF;   // Clear all TAn
-	 MessageReceivedCount++;
-     //Read from Receive mailboxes and begin checking for data */
-     for(j=16; j<32; j++)         // Read & check 16 mailboxes
-     {
-        mailbox_read(halHandle->ecanaHandle,j);         // This func reads the indicated mailbox data
-        mailbox_check(TestMbox1,TestMbox2,TestMbox3); // Checks the received data
-     }
-#endif
-
 #ifdef ECAN_API
 
-     int i = 0;
-     for(i = 0; i < 16; i++) {
-    	 ECAN_sendMsg_N(halHandle->ecanaHandle, &gECAN_Mailbox, i+gTXtemp, 0x89ABCDEF);
-    	 MessageReceivedCount++;
+//     int i = 0;
+//     for(i = 0; i < 16; i++) {
+//    	 ECAN_sendMsg_N(halHandle->ecanaHandle, &gECAN_Mailbox, i+gTXtemp, 0x89ABCDEF);
+//    	 MessageReceivedCount++;
+//     }
+//     if(ECAN_checkMail(halHandle->ecanaHandle)) {
+//    	ECAN_getMsgFIFO_ID(halHandle->ecanaHandle, MailBox31, &gECAN_rxFIFO_ID);
+//     }
+
+     ECAN_rxBuf[3] = ECAN_isRx(halHandle->ecanaHandle);
+     if(ECAN_rxBuf[3] == 16){
+    	 ECAN_getMsgFIFO_ID_N(halHandle->ecanaHandle, &gECAN_Mailbox, &gECAN_rxFIFO_ID);
+    	 FIFO_FLUSH(gECAN_rxFIFO_ID);
      }
 
-     if(ECAN_isRx(halHandle->ecanaHandle) == 16){
-    	 ECAN_getMsgFIFO_N(halHandle->ecanaHandle, &gECAN_Mailbox, &gECAN_rxFIFO);
-    	 FIFO_FLUSH(gECAN_rxFIFO);
-     }
-     for(i = 0; i < 16; i++) {
-    	 ECAN_rxBuf[0] = FIFO_FRONT(gECAN_rxFIFO);
-    	 FIFO_POP(gECAN_rxFIFO);
-    	 ECAN_rxBuf[1] = FIFO_FRONT(gECAN_rxFIFO);
-    	 FIFO_POP(gECAN_rxFIFO);
-
-    	    if((ECAN_rxBuf[0] == i+gTXtemp) || ( ECAN_rxBuf[1] == 0x89ABCDEF)) {
-    	    	PassCount++;
-    	    } else {
-    	    	ErrorCount++;
-    	    }
-    	     gTXtemp++;
-     }
+//     for(i = 0; i < 16; i++) {
+//    	 ECAN_rxBuf[0] = FIFO_FRONT(gECAN_rxFIFO);
+//    	 FIFO_POP(gECAN_rxFIFO);
+//    	 ECAN_rxBuf[1] = FIFO_FRONT(gECAN_rxFIFO);
+//    	 FIFO_POP(gECAN_rxFIFO);
+//
+//    	    if((ECAN_rxBuf[0] == i+gTXtemp) || ( ECAN_rxBuf[1] == 0x89ABCDEF)) {
+//    	    	PassCount++;
+//    	    } else {
+//    	    	ErrorCount++;
+//    	    }
+//    	     gTXtemp++;
+//     }
 
 
 
@@ -849,28 +784,6 @@ interrupt void timer0ISR(void){
 	timer0_count++;
 	return;
 } // end of timer0ISR() function
-
-#ifdef ecan_test
-
-void mailbox_read(ECAN_Handle handle, int_least16_t MBXnbr){
-   volatile struct MBOX *Mailbox = (&(handle->ECanaMboxes->MBOX0)) + MBXnbr;
-   TestMbox1 = Mailbox->MDL.all; // = 0x9555AAAn (n is the MBX number)
-   TestMbox2 = Mailbox->MDH.all; // = 0x89ABCDEF (a constant)
-   TestMbox3 = Mailbox->MSGID.all;// = 0x9555AAAn (n is the MBX number)
-
-} // MSGID of a rcv MBX is transmitted as the MDL data.
-
-void mailbox_check(int_least32_t T1, int_least32_t T2, int_least32_t T3){
-    if((T1 != T3) || ( T2 != 0x89ABCDEF))
-    {
-    	ErrorCount++;
-    }
-    else
-    {
-    	PassCount++;
-    }
-}
-#endif
 
 
 //@} //defgroup

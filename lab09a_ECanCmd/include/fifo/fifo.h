@@ -13,12 +13,28 @@
 //    unsigned char tail;\
 //    unsigned char head;\
 //  }
+
+#define ECAN_BUF_SIZE 16
+
+typedef struct _MSG_t_ {
+	uint32_t msgID; //ID of received message.
+	uint16_t dataLength; //Number of bytes received.
+	uint32_t dataL; //Bytes 0-3
+	uint32_t dataH; //Bytes 4-7
+} MSG_t;
+
+typedef struct _FIFO_ID_Obj_ {
+	MSG_t buf[ECAN_BUF_SIZE]; //ID of received message.
+	uint16_t tail; //Where the data is read.
+	uint16_t head; //Where the new data is inserted.
+} FIFO_ID_Obj;
+
 #define FIFO_s 32 // size
 
 typedef struct _FIFO_Obj_ {
-	volatile uint32_t buf[FIFO_s];
-	volatile unsigned char tail;
-	volatile unsigned char head;
+	uint32_t buf[FIFO_s];
+	uint16_t tail;
+	uint16_t head;
 } FIFO_Obj;
 
  
@@ -59,5 +75,14 @@ typedef struct _FIFO_Obj_ {
     (fifo).tail=0;\
     (fifo).head=0;\
   } 
+
+static inline void FIFO_PUSH_ID(FIFO_ID_Obj *g_FIFO, uint32_t msgID, uint32_t dlc_t, uint32_t dataL_t, uint32_t dataH_t) {
+	MSG_t msg;
+	msg.msgID = msgID;
+	msg.dataLength = dlc_t;
+	msg.dataL = dataL_t;
+	msg.dataH = dataH_t;
+	FIFO_PUSH(*g_FIFO, msg);
+}
  
 #endif //FIFO__H

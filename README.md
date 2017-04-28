@@ -10,4 +10,6 @@ lab01_ECanBack2Back - ControlSuite
 
 lab09a_ECanBack2Back_API - single reading/writing
 
+lab09a_ECanFIFO - burst reading with FIFO
+
 lab09a_ECanCmd - burst reading/writing with FIFO

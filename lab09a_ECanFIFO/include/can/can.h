@@ -1374,42 +1374,6 @@ typedef enum
 	DLC_8
 } DLC_Bit_e;
 
-typedef enum
-{
-  Tx_leve0=0,
-  Tx_leve1,
-  Tx_leve2,
-  Tx_leve3,
-  Tx_leve4,
-  Tx_leve5,
-  Tx_leve6,
-  Tx_leve7,
-  Tx_leve8,
-  Tx_leve9,
-  Tx_leve10,
-  Tx_leve11,
-  Tx_leve12,
-  Tx_leve13,
-  Tx_leve14,
-  Tx_leve15,
-  Tx_leve16,
-  Tx_leve17,
-  Tx_leve18,
-  Tx_leve19,
-  Tx_leve20,
-  Tx_leve21,
-  Tx_leve22,
-  Tx_leve23,
-  Tx_leve24,
-  Tx_leve25,
-  Tx_leve26,
-  Tx_leve27,
-  Tx_leve28,
-  Tx_leve29,
-  Tx_leve30,
-  Tx_leve31
-} TPL_Bit_e;
-
 typedef volatile struct ECAN_REGS ECAN_REGS_t;
 typedef volatile struct ECAN_MBOXES ECAN_MBOXES_t;
 typedef volatile struct LAM_REGS LAM_REGS_t;
@@ -1427,14 +1391,14 @@ typedef struct _ECAN_Obj_{
 typedef struct _ECAN_Obj_ *ECAN_Handle;
 
 typedef struct _ECAN_Mailbox_Obj_{
-	ECAN_MailBox_e TX_last;
-	ECAN_MailBox_e TX_max;
-	ECAN_MailBox_e TX_min;
-	bool TX_ind;
-	ECAN_MailBox_e RX_last;
-	ECAN_MailBox_e RX_max;
-	ECAN_MailBox_e RX_min;
-	bool RX_ind;
+	volatile uint16_t TX_last;
+	volatile uint16_t TX_max;
+	volatile uint16_t TX_min;
+	volatile uint16_t TX_ind;
+	volatile uint16_t RX_last;
+	volatile uint16_t RX_max;
+	volatile uint16_t RX_min;
+	volatile uint16_t RX_ind;
 } ECAN_Mailbox;
 
 //typedef struct _ECAN_Mailbox_Obj_ *ECAN_Mailbox;
@@ -1444,7 +1408,6 @@ void ECAN_setBitrate(ECAN_Handle handle, ECAN_Bitrate_e bitrate);
 void ECAN_setBTCreg(ECAN_Handle handle, long BTC_ALL);
 void ECAN_enableAllInt(ECAN_Handle handle);
 void ECAN_disableAllInt(ECAN_Handle handle);
-void ECAN_setTx_Priority(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, TPL_Bit_e TPL_t);
 void ECAN_clearMSGCTRL(ECAN_Handle handle);
 void ECAN_clearMSGID(ECAN_Handle handle);
 void ECAN_clearMDL(ECAN_Handle handle);
@@ -1467,12 +1430,14 @@ void ECAN_resetSelfTest(ECAN_Handle handle);
 void ECAN_SelfTest(ECAN_Handle handle,STM_Bit_e mode);
 void ECAN_setMailboxDir(ECAN_Handle handle,long dir);
 void ECAN_setMailboxIntMask(ECAN_Handle handle,long mask);
+void ECAN_configMailbox(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, uint32_t msgid, Enable_Mbox_e enable_t, ECAN_MailDir_e dir_t,IDE_Bit_e IDE_t, DLC_Bit_e length, OPC_Bit_e opc_t, LAMI_Bit_e lami_bit, AME_Bit_e AME_t, uint32_t mask);
 void ECAN_putDataMailbox(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, long MDL_t, long MDH_t);
 void ECAN_configMasterReg(ECAN_Handle handle, CCR_Bit_e CCR_t, PDR_Bit_e PDR_t, DBO_Bit_e DBO_t, WUBA_Bit_e WUBA_t, CDR_Bit_e CDR_t, ABO_Bit_e ABO_t, SRES_Bit_e SRES_t,MBNR_Bit_e MBNR_t);
 int ECAN_sendMsg(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, long MDL_t, long MDH_t);
-void ECAN_initMailboxUse(ECAN_Mailbox *pECAN_Mailbox, ECAN_MailBox_e TX_max_t, ECAN_MailBox_e TX_min_t, ECAN_MailBox_e RX_max_t, ECAN_MailBox_e RX_min_t);
-int ECAN_sendMsg_N(ECAN_Handle handle, ECAN_Mailbox *pECAN_Mailbox, uint32_t MDL_t, uint32_t MDH_t);
+void ECAN_initMailboxObj(ECAN_Mailbox *pECAN_Mailbox, ECAN_MailBox_e TX_max_t, ECAN_MailBox_e TX_min_t, ECAN_MailBox_e RX_max_t, ECAN_MailBox_e RX_min_t);
+int ECAN_sendMsg_N(ECAN_Handle handle, ECAN_Mailbox *pECAN_Mailbox, long MDL_t, long MDH_t);
 bool ECAN_checkMail(ECAN_Handle handle);
+//uint32_t ECAN_checkMail(ECAN_Handle handle);
 uint32_t ECAN_getRMP(ECAN_Handle handle);
 uint32_t ECAN_getRML(ECAN_Handle handle);
 uint32_t ECAN_getOPC(ECAN_Handle handle);
@@ -1480,38 +1445,6 @@ bool ECAN_getMsg(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, uint32_t *MDL_t, ui
 bool ECAN_getMsgFIFO(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, FIFO_Obj *pECAN_rxFIFO);
 bool ECAN_getMsgFIFO_N(ECAN_Handle handle, ECAN_Mailbox *pECAN_Mailbox, FIFO_Obj *pECAN_rxFIFO);
 uint8_t ECAN_isRx(ECAN_Handle handle);
-
-void ECAN_setData_length(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, DLC_Bit_e DLC_t);
-uint8_t ECAN_getData_length(ECAN_Handle handle, ECAN_MailBox_e MailBoxN);
-
-void ECAN_clearMD_0_15(ECAN_Handle handle);
-void ECAN_configMailbox(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, uint32_t msgid, Enable_Mbox_e enable_t, ECAN_MailDir_e dir_t,IDE_Bit_e IDE_t, DLC_Bit_e length, OPC_Bit_e opc_t, LAMI_Bit_e lami_bit, AME_Bit_e AME_t, uint32_t mask);
-
-bool ECAN_getMsgFIFO_ID(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, FIFO_ID_Obj *pECAN_FIFO);
-bool ECAN_getMsgFIFO_ID_N(ECAN_Handle handle, ECAN_Mailbox *pECAN_Mailbox, FIFO_ID_Obj *pECAN_FIFO);
-
-void ECAN_MailBox_Enable(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, Enable_Mbox_e enable);
-void ECAN_setMailBox_ID(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, uint16_t nodeID);
-
-void ECAN_putDataMailbox_ID(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, uint16_t nodeID, DLC_Bit_e length, uint32_t MDL_t, uint32_t MDH_t);
-int ECAN_transmitMsg(ECAN_Handle handle, ECAN_MailBox_e MailBoxN);
-int ECAN_transmit_N(ECAN_Handle handle, uint32_t trs_t);
-
-int ECAN_sendMsg_ID(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, uint16_t nodeID, DLC_Bit_e length, uint32_t MDL_t, uint32_t MDH_t);
-int ECAN_sendMsg_FIFO_ID(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, FIFO_ID_Obj *pECAN_txFIFO);
-int ECAN_sendMsg_FIFO_ID_One(ECAN_Handle handle, ECAN_Mailbox *pECAN_Mailbox, FIFO_ID_Obj *pECAN_txFIFO);
-
-// INT
-void ECAN_clearRxInterrupt(ECAN_Handle handle, int intNum);
-void ECAN_clearTxInterrupt(ECAN_Handle handle, int intNum);
-uint16_t ECAN_getMboxInterruptSource0(ECAN_Handle handle);
-uint16_t ECAN_getMboxInterruptSource1(ECAN_Handle handle);
-
-// Not tested
-void ECAN_configAuto_Answer(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, uint32_t msgid, IDE_Bit_e IDE_t, DLC_Bit_e length, uint32_t MDL_t, uint32_t MDH_t);
-void ECAN_Updating_Auto_Answer(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, uint32_t MDL_t, uint32_t MDH_t);
-
-
 
 
 #ifdef __cplusplus

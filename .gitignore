@@ -5,12 +5,15 @@
 /lab09a_ECanBack2Back_API/Release
 /lab09a_ECanCmd/Flash
 /lab09a_ECanCmd/Release
+/lab09a_ECanFIFO/Flash
+/lab09a_ECanFIFO/Release
 
 
 # Ignore all content of the .launches/ folder.
 /lab01_ECanBack2Back/.launches
 /lab09a_ECanBack2Back_API/.launches
 /lab09a_ECanCmd/.launches
+/lab09a_ECanFIFO/.launches
 
 
 # Ignore RemoteSystemsTempFiles
