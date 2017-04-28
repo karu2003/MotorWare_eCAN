@@ -108,6 +108,8 @@ CTRL_Obj ctrl;				//v1p7 format
 uint16_t gLEDcnt = 0;
 
 #ifdef ECAN_API
+#endif
+
 uint_least32_t  ErrorCount = 0;
 uint_least32_t  PassCount = 0;
 uint_least32_t  MessageReceivedCount = 0;
@@ -116,11 +118,12 @@ uint16_t gTXtemp = 0;
 
 int ECANIDS = 6;
 uint32_t ECAN_rxBuf[8] = {0,0,0,0,0,0,0,0};
-ECAN_Mailbox gECAN_Mailbox;
 
+ECAN_Mailbox gECAN_Mailbox;
 FIFO_ID_Obj gECAN_rxFIFO_ID;
 FIFO_ID_Obj gECAN_txFIFO_ID;
-#endif
+MSG_t msg_temp;
+
 
 uint32_t timer0_count=0;
 
@@ -378,6 +381,7 @@ void main(void)
 //  ECAN_transmit_N(halHandle->ecanaHandle, (uint32_t)((1<<MailBox13) | (1<<MailBox14)));
 //  ECAN_sendMsg_ID(halHandle->ecanaHandle, MailBox12, 0x206, DLC_4, 0xA5A5A5A5, 0xA5A5A5A5);
 
+#ifdef ECAN_API
    int i = 0;
    for(i = 0; i < 16; i++) {
 	   FIFO_PUSH_ID(&gECAN_txFIFO_ID, 0x006 + (0x100*i), DLC_0 + i, 0x01020304, 0x05060708);
@@ -385,11 +389,40 @@ void main(void)
    }
 
    while(!(ECAN_sendMsg_FIFO_ID_One(halHandle->ecanaHandle, &gECAN_Mailbox, &gECAN_txFIFO_ID))) MessageReceivedCount++;
+#endif
+
+//   gMotorVars.Flag_enableSys = true;
 
   for(;;)
   {
     // Waiting for enable system flag to be set
-    while(!(gMotorVars.Flag_enableSys));
+    while(!(gMotorVars.Flag_enableSys)) {
+#ifdef test_cmd
+    	if(ECAN_checkMail(halHandle->ecanaHandle)) {
+    		ECAN_getMsgFIFO_ID_N(halHandle->ecanaHandle, &gECAN_Mailbox, &gECAN_rxFIFO_ID);
+    	}
+
+    	while(!(FIFO_IS_EMPTY(gECAN_rxFIFO_ID))) {
+    		msg_temp = FIFO_FRONT(gECAN_rxFIFO_ID);
+    		FIFO_POP(gECAN_rxFIFO_ID);
+
+    		int i = 0;
+    		i = msg_temp.msgID;
+    		switch(i) {
+    			case 0x006: gMotorVars.Flag_enableUserParams = false; break;
+    			case 0x106: gMotorVars.Flag_enableUserParams = true; break;
+//		   		case (ECANIDS + (0x100*2)): gMotorVars.Flag_enableSys = true; break;
+//		   		case (ECANIDS + (0x100*3)): gMotorVars.Flag_enableSys = true; break;
+//		   		case (ECANIDS + (0x100*4)): gMotorVars.Flag_enableSys = true; break;
+//		   		case (ECANIDS + (0x100*5)): gMotorVars.Flag_enableSys = true; break;
+//		   		case (ECANIDS + (0x100*6)): gMotorVars.Flag_enableSys = true; break;
+//		   		case (ECANIDS + (0x100*7)): gMotorVars.Flag_enableSys = true; break;
+    			default:			           gMotorVars.Flag_enableSys = true; break;
+    		}
+    	}
+		FIFO_FLUSH(gECAN_rxFIFO_ID);
+#endif
+    }
 
     Flag_Latch_softwareUpdate = true;
 

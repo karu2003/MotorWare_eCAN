@@ -1472,13 +1472,15 @@ void ECAN_configMasterReg(ECAN_Handle handle, CCR_Bit_e CCR_t, PDR_Bit_e PDR_t, 
 int ECAN_sendMsg(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, long MDL_t, long MDH_t);
 void ECAN_initMailboxUse(ECAN_Mailbox *pECAN_Mailbox, ECAN_MailBox_e TX_max_t, ECAN_MailBox_e TX_min_t, ECAN_MailBox_e RX_max_t, ECAN_MailBox_e RX_min_t);
 int ECAN_sendMsg_N(ECAN_Handle handle, ECAN_Mailbox *pECAN_Mailbox, uint32_t MDL_t, uint32_t MDH_t);
-bool ECAN_checkMail(ECAN_Handle handle);
 uint32_t ECAN_getRMP(ECAN_Handle handle);
 uint32_t ECAN_getRML(ECAN_Handle handle);
 uint32_t ECAN_getOPC(ECAN_Handle handle);
+
 bool ECAN_getMsg(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, uint32_t *MDL_t, uint32_t *MDH_t);
 bool ECAN_getMsgFIFO(ECAN_Handle handle,ECAN_MailBox_e MailBoxN, FIFO_Obj *pECAN_rxFIFO);
 bool ECAN_getMsgFIFO_N(ECAN_Handle handle, ECAN_Mailbox *pECAN_Mailbox, FIFO_Obj *pECAN_rxFIFO);
+
+bool ECAN_checkMail(ECAN_Handle handle);
 uint8_t ECAN_isRx(ECAN_Handle handle);
 
 void ECAN_setData_length(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, DLC_Bit_e DLC_t);
@@ -1510,8 +1512,6 @@ uint16_t ECAN_getMboxInterruptSource1(ECAN_Handle handle);
 // Not tested
 void ECAN_configAuto_Answer(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, uint32_t msgid, IDE_Bit_e IDE_t, DLC_Bit_e length, uint32_t MDL_t, uint32_t MDH_t);
 void ECAN_Updating_Auto_Answer(ECAN_Handle handle, ECAN_MailBox_e MailBoxN, uint32_t MDL_t, uint32_t MDH_t);
-
-
 
 
 #ifdef __cplusplus
