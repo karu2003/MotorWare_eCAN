@@ -1,6 +1,7 @@
-/Release__opt_for_speed__0/
-/Release__opt_for_speed__1/
-/Release__opt_for_speed__2/
-/Release__opt_for_speed__3/
-/Release__opt_for_speed__4/
-/Release__opt_for_speed__5/
+# Ignore all files in the release & flash folder.
+/Flash
+/Release
+
+# Ignore all content of the .launches/ folder.
+/.launches
+
