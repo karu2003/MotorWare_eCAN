@@ -1,0 +1,7 @@
+# Ignore all files in the release & flash folder.
+/Flash
+/Release
+
+# Ignore all content of the .launches/ folder.
+/.launches
+
