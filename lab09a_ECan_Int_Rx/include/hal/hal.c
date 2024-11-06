@@ -1799,7 +1799,7 @@ void HAL_setupECAN(HAL_Handle handle){
 
 	ECAN_disableAllInt(obj->ecanaHandle);
 	ECAN_configMasterReg(obj->ecanaHandle, Normal_operation, Power_normal, MSB, PDR_activity, Requests_normal, ABO_0, No_effect, Mailbox_N0);
-	ECAN_setBitrate(obj->ecanaHandle, Bitrate_500K); // 90 MHz SYSCLKOUT. 45 MHz CAN module clock Bit rate = 500 Kbps
+	ECAN_setBitrate(obj->ecanaHandle, Bitrate_1M); // 90 MHz SYSCLKOUT. 45 MHz CAN module clock Bit rate = 500 Kbps
 
 //	ECAN_setBTCreg(obj->ecanaHandle, 0x000503BD); // sprac35
 //	ECAN_enableAllInt(obj->ecanaHandle);
