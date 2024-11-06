@@ -260,7 +260,7 @@
 	<variableList>
 		<variable>
 			<name>MW_INSTALL_DIR</name>
-			<value>file:/C:/ti/motorware/motorware_1_01_00_18</value>
+			<value>file:/home/andrew/ti/motorware/motorware_1_01_00_18</value>
 		</variable>
 	</variableList>
 </projectDescription>
